@@ -26,4 +26,14 @@ class MainActivity : AppCompatActivity(), SigninFragment.ReplaceFragmentInterfac
                     .commit()
         }
     }
+
+    override fun onBackPressed() {
+        if (fragmentManager.backStackEntryCount> 0)
+        {
+            fragmentManager.popBackStack()
+        } else
+        {
+            super.onBackPressed()
+        }
+    }
 }
