@@ -4,7 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.Fragment
 
-class MainActivity : AppCompatActivity(), SigninFragment.ReplaceFragmentInterface {
+class MainActivity : AppCompatActivity(), ReplaceFragmentInterface {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +31,8 @@ class MainActivity : AppCompatActivity(), SigninFragment.ReplaceFragmentInterfac
         if (fragmentManager.backStackEntryCount> 0)
         {
             fragmentManager.popBackStack()
-        } else
+        }
+        else
         {
             super.onBackPressed()
         }

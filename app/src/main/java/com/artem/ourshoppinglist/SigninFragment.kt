@@ -12,12 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.fragment_signin.*
 
 class SigninFragment : Fragment() {
-
-    interface ReplaceFragmentInterface {
-        fun replaceFragment(fragment: Fragment)
-    }
-
-    private var activityCallback: SigninFragment.ReplaceFragmentInterface? = null
+    private var activityCallback: ReplaceFragmentInterface? = null
     private var fbAuth = FirebaseAuth.getInstance()
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
