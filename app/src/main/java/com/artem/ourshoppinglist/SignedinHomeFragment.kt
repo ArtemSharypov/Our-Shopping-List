@@ -14,10 +14,6 @@ import kotlinx.android.synthetic.main.dialog_create_list.view.*
 import kotlinx.android.synthetic.main.fragment_signedin_home.*
 
 class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
-    interface ReplaceFragmentInterface {
-        fun replaceFragment(fragment: Fragment)
-    }
-
     private var fbAuth = FirebaseAuth.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
 
@@ -30,7 +26,7 @@ class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
             }
         }
 
-        //so get all list names and their keys here from firebase
+        //todo get all list names and their keys here from firebase
         //then populate the list with it
         var shoppingLists = ArrayList<ShoppingList>()
 
@@ -49,8 +45,7 @@ class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
 
             alertDialogBuilder.setCancelable(true)
                     .setPositiveButton("Create List", {dialogInterface, i ->
-                        //create the list in firebase
-
+                        //todo create the list in firebase
                         //once created then switch to the fragment
 
                         var selectedListFragment = SelectedListFragment()

@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/fragment_selected_list_rv_lists"
+    <ExpandableListView
+        android:id="@+id/fragment_selected_list_elv_lists"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginEnd="8dp"
@@ -25,7 +25,7 @@
         android:layout_marginBottom="24dp"
         android:layout_marginEnd="36dp"
         android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="@+id/fragment_selected_list_rv_lists"
+        app:layout_constraintBottom_toBottomOf="@+id/fragment_selected_list_elv_lists"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_input_add" />
 

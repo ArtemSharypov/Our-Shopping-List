@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.row_shopping_list.view.*
 
 
-class ShoppingListAdapter(var shoppingLists: ArrayList<ShoppingList>, var callback: ShoppingListAdapter.OnListClicked) : RecyclerView.Adapter<ShoppingListAdapter.ViewHolder>() {
+class ShoppingListAdapter(shoppingLists: ArrayList<ShoppingList>, callback: ShoppingListAdapter.OnListClicked) : RecyclerView.Adapter<ShoppingListAdapter.ViewHolder>() {
+    private var shoppingLists = shoppingLists
+    private var callback = callback
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         fun bindItems(currList: ShoppingList, callback: OnListClicked){
