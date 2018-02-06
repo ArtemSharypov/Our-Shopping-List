@@ -104,6 +104,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         bundle.putString("listKey", listKey)
         bundle.putString("barcode", categoryItem.barcode)
         bundle.putString("category", categoryItem.categoryName)
+        bundle.putString("itemName", categoryItem.itemName)
         bundle.putInt("quantity", categoryItem.quantity)
 
         editItemFragment.arguments = bundle
