@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.fragment_signin.*
+import kotlinx.android.synthetic.main.fragment_signin.view.*
 
 class SigninFragment : Fragment() {
     private var activityCallback: ReplaceFragmentInterface? = null
@@ -18,15 +19,26 @@ class SigninFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_signin, container, false)
 
-        fragment_signin_btn_sign_in.setOnClickListener{
+        view.fragment_signin_btn_sign_in.setOnClickListener{
             signin()
         }
 
-        fragment_signin_tv_create_account.setOnClickListener {
+        view.fragment_signin_tv_create_account.setOnClickListener {
             switchToSignUp()
         }
 
         return view
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        var user = fbAuth.currentUser
+
+        if(user != null) {
+            var intent = Intent(activity, SignedinActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     //Tries to use the email and password provided to sign into firebase
@@ -40,22 +52,27 @@ class SigninFragment : Fragment() {
         })
         snackBar.show()
 
-        fbAuth.signInWithEmailAndPassword(fragment_signin_et_email_input.text.toString(), fragment_signin_et_password.text.toString())
-                .addOnCompleteListener { task ->
-                    if(task.isSuccessful) {
-                        fragment_signin_et_email_input.setText("")
-                        fragment_signin_et_password.setText("")
-                        snackBar.dismiss()
+        //Tries to sign a user in, catch is meant for when password or email is an empty string to prevent a crash
+        try {
+            fbAuth.signInWithEmailAndPassword(fragment_signin_et_email_input.text.toString(), fragment_signin_et_password.text.toString())
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            fragment_signin_et_email_input.setText("")
+                            fragment_signin_et_password.setText("")
+                            snackBar.dismiss()
 
-                        var intent = Intent(activity, SignedinActivity::class.java)
-                        intent.putExtra("id", fbAuth.currentUser?.email)
-                        startActivity(intent)
+                            var intent = Intent(activity, SignedinActivity::class.java)
+                            startActivity(intent)
 
-                    } else {
-                        Snackbar.make(fragment_signin_btn_sign_in, "Error: ${task.exception?.message}", Snackbar.LENGTH_INDEFINITE)
-                                .setAction("Action", null).show()
+                        } else {
+                            Snackbar.make(fragment_signin_btn_sign_in, "Error: ${task.exception?.message}", Snackbar.LENGTH_INDEFINITE)
+                                    .setAction("Action", null).show()
+                        }
                     }
-                }
+        } catch (exception: IllegalArgumentException) {
+            Snackbar.make(fragment_signin_btn_sign_in, "Error: Email or Password is empty", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Action", null).show()
+        }
     }
 
     override fun onAttach(context: Context?) {

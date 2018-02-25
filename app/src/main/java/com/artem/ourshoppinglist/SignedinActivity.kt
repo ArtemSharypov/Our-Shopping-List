@@ -8,7 +8,7 @@ import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_signedin.*
 
-class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface {
+class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeToolbarTitleInterface {
 
     private var fbAuth = FirebaseAuth.getInstance()
 
@@ -17,7 +17,7 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface {
         setContentView(R.layout.activity_signedin)
 
         setSupportActionBar(toolbar)
-        activity_signedin_tv_toolbar_title.text = getString(R.string.app_name)
+        supportActionBar?.title = getString(R.string.app_name)
 
         fbAuth.addAuthStateListener {
             if(fbAuth.currentUser == null){
@@ -28,7 +28,7 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface {
         var signedinHomeFragment = SignedinHomeFragment()
 
         supportFragmentManager.beginTransaction()
-                .replace(R.id.activity_main_frame_fragment_holder, signedinHomeFragment)
+                .add(R.id.activity_signedin_frame_fragment_holder, signedinHomeFragment)
                 .addToBackStack(null)
                 .commit()
     }
@@ -65,6 +65,10 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface {
                     .addToBackStack(null)
                     .commit()
         }
+    }
+
+    override fun replaceToolbarTitle(newTitle: String) {
+        supportActionBar?.title = newTitle
     }
 
     //Signs out the current user from Firebase

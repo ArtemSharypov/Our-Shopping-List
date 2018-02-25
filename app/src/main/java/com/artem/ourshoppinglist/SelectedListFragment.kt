@@ -5,14 +5,12 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.view.*
-import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.activity_signedin.*
 import kotlinx.android.synthetic.main.dialog_create_new_category.view.*
-import kotlinx.android.synthetic.main.fragment_selected_list.*
+import kotlinx.android.synthetic.main.fragment_selected_list.view.*
 
 class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
-    private var fbAuth = FirebaseAuth.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
+    private var activityToolbarCallback: ChangeToolbarTitleInterface? = null
     private lateinit var selectedListAdapter: SelectedListAdapter
     private lateinit var listKey: String
     private lateinit var listName: String
@@ -26,7 +24,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         }
 
         setHasOptionsMenu(true)
-        activity_signedin_tv_toolbar_title.text = listName
+        activityToolbarCallback?.replaceToolbarTitle(listName)
 
         //todo get all categories and items for a list from firebase and populate the adapter with it
         var categoriesList = ArrayList<Category>()
@@ -34,13 +32,13 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
 
         selectedListAdapter = SelectedListAdapter(context, categoriesList, categoryItems, this)
 
-        fragment_selected_list_elv_lists.setAdapter(selectedListAdapter)
+        view.fragment_selected_list_elv_lists.setAdapter(selectedListAdapter)
 
-        fragment_selected_list_fab_new_item.setOnClickListener {
+        view.fragment_selected_list_fab_new_item.setOnClickListener {
             createNewCategoryItem()
         }
 
-        fragment_selected_list_btn_new_category.setOnClickListener {
+        view.fragment_selected_list_btn_new_category.setOnClickListener {
             createNewCategoryDialog()
         }
 
@@ -74,13 +72,11 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         alertDialog.show()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_signedin, menu)
-
+    override fun onPrepareOptionsMenu(menu: Menu?) {
         menu?.findItem(R.id.action_delete)?.isVisible = true
         menu?.findItem(R.id.action_back)?.isVisible = true
 
-        super.onCreateOptionsMenu(menu, inflater)
+        super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -88,17 +84,6 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         var id = item?.itemId
 
         when(id) {
-            R.id.action_sign_out -> {
-                selected = true
-                signOut()
-            }
-
-            R.id.action_settings -> {
-                selected = true
-                var settingsFragment = SettingsFragment()
-                activityCallback?.replaceFragment(settingsFragment)
-            }
-
             R.id.action_delete -> {
                 selected = true
                 deleteList()
@@ -113,16 +98,12 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         return selected
     }
 
-    //Signs out the current user from Firebase
-    private fun signOut(){
-        fbAuth.signOut()
-    }
-
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
         try {
             activityCallback = context as ReplaceFragmentInterface
+            activityToolbarCallback = context as ChangeToolbarTitleInterface
         } catch (e: ClassCastException) {
             throw ClassCastException(context?.toString() + " must implement ReplaceFragmentInterface")
         }

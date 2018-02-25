@@ -3,18 +3,14 @@ package com.artem.ourshoppinglist
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v7.app.AlertDialog
 import android.view.*
 import android.widget.ArrayAdapter
-import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.activity_signedin.*
-import kotlinx.android.synthetic.main.dialog_create_new_category.view.*
 import kotlinx.android.synthetic.main.fragment_edit_item.*
 import kotlinx.android.synthetic.main.fragment_edit_item.view.*
 
 class EditItemFragment : Fragment() {
-    private var fbAuth = FirebaseAuth.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
+    private var activityToolbarCallback: ChangeToolbarTitleInterface? = null
     private lateinit var listKey: String
     private lateinit var itemKey: String
     private var categoryNames = ArrayList<String>()
@@ -23,8 +19,11 @@ class EditItemFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_edit_item, container, false)
 
+        listKey = ""
+        itemKey = ""
+
         setHasOptionsMenu(true)
-        activity_signedin_tv_toolbar_title.text = ""
+        activityToolbarCallback?.replaceToolbarTitle("")
 
         //todo get all categoryNames for a list from firebase
         //then parse each category retrieving name, as well as key
@@ -74,13 +73,11 @@ class EditItemFragment : Fragment() {
         return view
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_signedin, menu)
-
+    override fun onPrepareOptionsMenu(menu: Menu?) {
         menu?.findItem(R.id.action_cancel)?.isVisible = true
         menu?.findItem(R.id.action_save)?.isVisible = true
 
-        super.onCreateOptionsMenu(menu, inflater)
+        super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -88,17 +85,6 @@ class EditItemFragment : Fragment() {
         var id = item?.itemId
 
         when(id) {
-            R.id.action_sign_out -> {
-                selected = true
-                signOut()
-            }
-
-            R.id.action_settings -> {
-                selected = true
-                var settingsFragment = SettingsFragment()
-                activityCallback?.replaceFragment(settingsFragment)
-            }
-
             R.id.action_cancel -> {
                 selected = true
                 cancel()
@@ -111,11 +97,6 @@ class EditItemFragment : Fragment() {
         }
 
         return selected
-    }
-
-    //Signs out the current user from Firebase
-    private fun signOut(){
-        fbAuth.signOut()
     }
 
     //Switches to a screen to allow the scanning of a barcode
@@ -160,6 +141,7 @@ class EditItemFragment : Fragment() {
 
         try {
             activityCallback = context as ReplaceFragmentInterface
+            activityToolbarCallback = context as ChangeToolbarTitleInterface
         } catch (e: ClassCastException) {
             throw ClassCastException(context?.toString() + " must implement ReplaceFragmentInterface")
         }
