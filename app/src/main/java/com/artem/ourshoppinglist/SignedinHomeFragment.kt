@@ -5,26 +5,22 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.LinearLayout
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.activity_signedin.*
 import kotlinx.android.synthetic.main.dialog_create_list.view.*
 import kotlinx.android.synthetic.main.fragment_signedin_home.*
 
 class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
-    private var fbAuth = FirebaseAuth.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
+    private var fbAuth = FirebaseAuth.getInstance()
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_signedin_home, container, false)
 
-        fbAuth.addAuthStateListener {
-            if(fbAuth.currentUser == null){
-                activity.finish()
-            }
-        }
+        setHasOptionsMenu(true)
+        activity_signedin_tv_toolbar_title.text = getString(R.string.app_name)
 
         //todo get all list names and their keys here from firebase
         //then populate the list with it
@@ -68,6 +64,36 @@ class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
         return view
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.menu_signedin, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        var selected =  super.onOptionsItemSelected(item)
+        var id = item?.itemId
+
+        when(id) {
+            R.id.action_sign_out -> {
+                selected = true
+                signOut()
+            }
+
+            R.id.action_settings -> {
+                selected = true
+                var settingsFragment = SettingsFragment()
+                activityCallback?.replaceFragment(settingsFragment)
+            }
+        }
+
+        return selected
+    }
+
+    //Signs out the current user from Firebase
+    private fun signOut(){
+        fbAuth.signOut()
+    }
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
@@ -78,6 +104,7 @@ class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
         }
     }
 
+    //Switches to the list that was clicked
     override fun shoppingListClicked(shoppingList: ShoppingList) {
         var selectedListFragment = SelectedListFragment()
 

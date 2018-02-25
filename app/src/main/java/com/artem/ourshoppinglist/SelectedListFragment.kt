@@ -4,10 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.activity_signedin.*
 import kotlinx.android.synthetic.main.dialog_create_new_category.view.*
 import kotlinx.android.synthetic.main.fragment_selected_list.*
 
@@ -16,19 +15,18 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
     private var activityCallback: ReplaceFragmentInterface? = null
     private lateinit var selectedListAdapter: SelectedListAdapter
     private lateinit var listKey: String
+    private lateinit var listName: String
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_selected_list, container, false)
 
-        fbAuth.addAuthStateListener {
-            if(fbAuth.currentUser == null){
-                activity.finish()
-            }
-        }
-
         if(arguments != null){
             listKey = arguments.getString("key")
+            listName = arguments.getString("listName")
         }
+
+        setHasOptionsMenu(true)
+        activity_signedin_tv_toolbar_title.text = listName
 
         //todo get all categories and items for a list from firebase and populate the adapter with it
         var categoriesList = ArrayList<Category>()
@@ -51,6 +49,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         return view
     }
 
+    //Creates a dialog for the name of a new category
     private fun createNewCategoryDialog(){
         //Create a dialog popup for creating a new category
         var inflater = activity.layoutInflater
@@ -75,6 +74,50 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         alertDialog.show()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.menu_signedin, menu)
+
+        menu?.findItem(R.id.action_delete)?.isVisible = true
+        menu?.findItem(R.id.action_back)?.isVisible = true
+
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        var selected =  super.onOptionsItemSelected(item)
+        var id = item?.itemId
+
+        when(id) {
+            R.id.action_sign_out -> {
+                selected = true
+                signOut()
+            }
+
+            R.id.action_settings -> {
+                selected = true
+                var settingsFragment = SettingsFragment()
+                activityCallback?.replaceFragment(settingsFragment)
+            }
+
+            R.id.action_delete -> {
+                selected = true
+                deleteList()
+            }
+
+            R.id.action_back -> {
+                selected = true
+                goBack()
+            }
+        }
+
+        return selected
+    }
+
+    //Signs out the current user from Firebase
+    private fun signOut(){
+        fbAuth.signOut()
+    }
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
@@ -85,6 +128,17 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         }
     }
 
+    //Goes back to the previous screen
+    private fun goBack(){
+        activity.onBackPressed()
+    }
+
+    //Deletes the current list
+    private fun deleteList() {
+        //todo implement deleting a list
+    }
+
+    //Switches to create a new category item fragment
     private fun createNewCategoryItem(){
         var editItemFragment = EditItemFragment()
 
@@ -96,6 +150,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         activityCallback?.replaceFragment(editItemFragment)
     }
 
+    //Switches to editing a category item fragment
     override fun categoryItemEditClicked(categoryItem: CategoryItem, listKey: String) {
         var editItemFragment = EditItemFragment()
 

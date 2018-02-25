@@ -3,11 +3,12 @@ package com.artem.ourshoppinglist
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.support.v7.app.AlertDialog
+import android.view.*
 import android.widget.ArrayAdapter
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.activity_signedin.*
+import kotlinx.android.synthetic.main.dialog_create_new_category.view.*
 import kotlinx.android.synthetic.main.fragment_edit_item.*
 import kotlinx.android.synthetic.main.fragment_edit_item.view.*
 
@@ -22,11 +23,8 @@ class EditItemFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_edit_item, container, false)
 
-        fbAuth.addAuthStateListener {
-            if(fbAuth.currentUser == null){
-                activity.finish()
-            }
-        }
+        setHasOptionsMenu(true)
+        activity_signedin_tv_toolbar_title.text = ""
 
         //todo get all categoryNames for a list from firebase
         //then parse each category retrieving name, as well as key
@@ -76,10 +74,56 @@ class EditItemFragment : Fragment() {
         return view
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.menu_signedin, menu)
+
+        menu?.findItem(R.id.action_cancel)?.isVisible = true
+        menu?.findItem(R.id.action_save)?.isVisible = true
+
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        var selected =  super.onOptionsItemSelected(item)
+        var id = item?.itemId
+
+        when(id) {
+            R.id.action_sign_out -> {
+                selected = true
+                signOut()
+            }
+
+            R.id.action_settings -> {
+                selected = true
+                var settingsFragment = SettingsFragment()
+                activityCallback?.replaceFragment(settingsFragment)
+            }
+
+            R.id.action_cancel -> {
+                selected = true
+                cancel()
+            }
+
+            R.id.action_save -> {
+                selected = true
+                saveItem()
+            }
+        }
+
+        return selected
+    }
+
+    //Signs out the current user from Firebase
+    private fun signOut(){
+        fbAuth.signOut()
+    }
+
+    //Switches to a screen to allow the scanning of a barcode
     private fun scanBarcode(){
         //todo implement being able to scan a barcode using mobile vision
     }
 
+    //Checks if there's an item with the existing barcode within the API call
     private fun searchWithBarcode(barcode: String){
         //todo implement searching for an item with a barcode
     }
@@ -88,6 +132,7 @@ class EditItemFragment : Fragment() {
         //todo implement adding a photo to an item
     }
 
+    //Saves the current item, or creates a new item
     private fun saveItem(){
         //todo implement creating and updating an item in firebase
 
@@ -105,6 +150,7 @@ class EditItemFragment : Fragment() {
         }
     }
 
+    //Goes back to the list of category items
     private fun cancel(){
         activity.onBackPressed()
     }
