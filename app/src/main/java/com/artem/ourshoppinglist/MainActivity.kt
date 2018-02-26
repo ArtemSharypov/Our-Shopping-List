@@ -10,6 +10,11 @@ class MainActivity : AppCompatActivity(), ReplaceFragmentInterface {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //Exit the app if necessary
+        if (intent.getBooleanExtra("EXIT", false)) {
+            finish()
+        }
+
         var signinFragment = SigninFragment()
 
         supportFragmentManager.beginTransaction()
@@ -28,9 +33,9 @@ class MainActivity : AppCompatActivity(), ReplaceFragmentInterface {
     }
 
     override fun onBackPressed() {
-        if (fragmentManager.backStackEntryCount> 0)
+        if (supportFragmentManager.backStackEntryCount > 0)
         {
-            fragmentManager.popBackStack()
+            supportFragmentManager.popBackStack()
         }
         else
         {

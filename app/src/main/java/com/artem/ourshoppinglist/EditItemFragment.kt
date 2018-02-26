@@ -5,10 +5,15 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.*
 import android.widget.ArrayAdapter
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_edit_item.*
 import kotlinx.android.synthetic.main.fragment_edit_item.view.*
 
 class EditItemFragment : Fragment() {
+    private var database = FirebaseDatabase.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
     private var activityToolbarCallback: ChangeToolbarTitleInterface? = null
     private lateinit var listKey: String
@@ -19,20 +24,8 @@ class EditItemFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_edit_item, container, false)
 
-        listKey = ""
-        itemKey = ""
-
         setHasOptionsMenu(true)
         activityToolbarCallback?.replaceToolbarTitle("")
-
-        //todo get all categoryNames for a list from firebase
-        //then parse each category retrieving name, as well as key
-
-
-        var arrayAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, categoryNames)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        view.fragment_edit_item_spnr_category_selection.adapter = arrayAdapter
 
         var barcode: String
         var category: String
@@ -40,14 +33,14 @@ class EditItemFragment : Fragment() {
         var quantity: Int
 
         if(arguments != null) {
-            listKey = arguments.getString("listKey")
+            listKey = arguments.getString("listKey", "")
             itemKey = arguments.getString("key", "")
-            barcode = arguments.getString("barcode")
-            category = arguments.getString("category")
-            itemName = arguments.getString("itemName")
-            quantity = arguments.getInt("quantity")
+            barcode = arguments.getString("barcode", "")
+            category = arguments.getString("category", "")
+            itemName = arguments.getString("itemName", "")
+            quantity = arguments.getInt("quantity", 0)
 
-            view.fragment_edit_item_et_quantity_input.setText(quantity)
+            view.fragment_edit_item_et_quantity_input.setText(quantity.toString())
             view.fragment_edit_item_et_barcode_input.setText(barcode)
             view.fragment_edit_item_et_item_name_input.setText(itemName)
 
@@ -57,6 +50,13 @@ class EditItemFragment : Fragment() {
                 view.fragment_edit_item_spnr_category_selection.setSelection(spinnerPos)
             }
         }
+
+        fillCategoryNamesAndKeys()
+
+        var arrayAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, categoryNames)
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        view.fragment_edit_item_spnr_category_selection.adapter = arrayAdapter
 
         view.fragment_edit_item_btn_add_photo.setOnClickListener {
             addPhoto()
@@ -71,6 +71,28 @@ class EditItemFragment : Fragment() {
         }
 
         return view
+    }
+
+    //Grabs all of Category names that are in the database, and their keys
+    private fun fillCategoryNamesAndKeys(){
+        //Grabs the categories from the DataSnapshot and adds them to the list
+        var categoryListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                for(postSnapShot in dataSnapshot!!.children) {
+                    var category = postSnapShot.getValue(Category::class.java)
+                    categoryNames.add(category?.categoryName!!)
+                    categoryKeys.add(category?.key!!)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError?) {
+                println("loadPost:onCancelled ${databaseError!!.toException()}")
+            }
+        }
+
+        //Grabs all current Categories that are part of a shopping list
+        var categoriesRef = database.getReference("Categories")
+        categoriesRef.orderByChild("belongsToListKey").equalTo(listKey).addListenerForSingleValueEvent(categoryListener)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?) {
@@ -115,18 +137,37 @@ class EditItemFragment : Fragment() {
 
     //Saves the current item, or creates a new item
     private fun saveItem(){
-        //todo implement creating and updating an item in firebase
-
         var categoryNamePos = categoryNames.indexOf(fragment_edit_item_spnr_category_selection.selectedItem.toString())
+        var categoryName: String
         var categoryKey: String
+        var barcode: String
+        var itemName: String
+        var quantity: Int
 
         if(categoryNamePos >= 0 && categoryNamePos < categoryKeys.size){
             categoryKey = categoryKeys[categoryNamePos]
+            categoryName = fragment_edit_item_spnr_category_selection.selectedItem.toString()
+            itemName = fragment_edit_item_et_item_name_input.text.toString()
+            quantity = fragment_edit_item_et_quantity_input.text.toString().toInt()
+            barcode = fragment_edit_item_et_barcode_input.text.toString()
+
+            var ref = database.getReference("CategoryItems")
 
             if(itemKey != null && itemKey != ""){
                 //update the item with the current itemKey
+                var category = CategoryItem(itemName, quantity, barcode, itemKey, categoryKey, categoryName, listKey)
+
+                ref.child(itemKey).setValue(category)
+
+                //todo add a toast for saying that it saved
             } else {
                 //create a new item
+                var createdCategoryItemRef = ref.push()
+                var category = CategoryItem(itemName, quantity, barcode, createdCategoryItemRef.key, categoryKey, categoryName, listKey)
+
+                createdCategoryItemRef.setValue(category)
+
+                //todo add a toast for saying that it created the new item
             }
         }
     }

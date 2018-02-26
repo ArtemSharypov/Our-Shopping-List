@@ -1,5 +1,6 @@
 package com.artem.ourshoppinglist
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -21,7 +22,11 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeTo
 
         fbAuth.addAuthStateListener {
             if(fbAuth.currentUser == null){
-                this.finish()
+                //Clear the activity stack, and then sets up for exiting the activity
+                var intent = Intent(applicationContext, MainActivity::class.java)
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                intent.putExtra("EXIT", true)
+                startActivity(intent)
             }
         }
 
@@ -77,13 +82,17 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeTo
     }
 
     override fun onBackPressed() {
-        if (fragmentManager.backStackEntryCount> 0)
+        if (supportFragmentManager.backStackEntryCount > 1)
         {
-            fragmentManager.popBackStack()
+            supportFragmentManager.popBackStack()
         }
         else
         {
-            super.onBackPressed()
+            //Clear the activity stack, and then sets up for exiting the activity
+            var intent = Intent(applicationContext, MainActivity::class.java)
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("EXIT", true)
+            startActivity(intent)
         }
     }
 }

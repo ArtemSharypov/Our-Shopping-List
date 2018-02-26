@@ -34,14 +34,16 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
 
     override fun getGroupView(groupPosition: Int, isExpanded: Boolean, convertView: View?, viewGroup: ViewGroup?): View {
         var category = getGroup(groupPosition) as Category
-        var view = convertView!!
+        var view: View
 
         if (convertView == null) {
             val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             view = inflater.inflate(R.layout.row_category_title, null)
+        } else {
+            view = convertView
         }
 
-        view.row_category_title_tv_category_name.text = category.categoryName
+        view.row_category_title_tv_category_name?.text = category.categoryName
 
         return view
     }
@@ -49,11 +51,13 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
     override fun getChildView(groupPosition: Int, childPosition: Int, isExpanded: Boolean, convertView: View?, viewGroup: ViewGroup?): View {
         var categoryItem = getChild(groupPosition, childPosition) as CategoryItem
         var category = getGroup(groupPosition) as Category
-        var view = convertView!!
+        var view: View
 
         if (convertView == null) {
             val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             view = inflater.inflate(R.layout.row_category_item, null)
+        } else {
+            view = convertView
         }
 
         view.row_category_item_tv_item_name.text = categoryItem.itemName
