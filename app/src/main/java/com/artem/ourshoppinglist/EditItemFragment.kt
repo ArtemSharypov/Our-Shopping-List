@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.*
 import android.widget.ArrayAdapter
+import android.widget.Spinner
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -20,6 +21,8 @@ class EditItemFragment : Fragment() {
     private lateinit var itemKey: String
     private var categoryNames = ArrayList<String>()
     private var categoryKeys = ArrayList<String>()
+    private var arrOfCategoryNames = arrayOfNulls<String>(0)
+    private lateinit var spinner: Spinner
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_edit_item, container, false)
@@ -51,12 +54,20 @@ class EditItemFragment : Fragment() {
             }
         }
 
+        spinner = view.fragment_edit_item_spnr_category_selection
         fillCategoryNamesAndKeys()
 
-        var arrayAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, categoryNames)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        //var spinnerCategoryAdapter = ArrayAdapter(context, R.layout.category_spinner_item, categoryNames)
+        //spinnerCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        view.fragment_edit_item_spnr_category_selection.adapter = arrayAdapter
+        //view.fragment_edit_item_spnr_category_selection.adapter = spinnerCategoryAdapter
+
+        var list_of_items = arrayOf("Item 1", "Item 2", "Item 3")
+
+        var arrOfItems =  arrayOfNulls<String>(categoryNames.size)
+        for(i in arrOfItems.indices) {
+            arrOfItems[i] = "stuff" + i
+        }
 
         view.fragment_edit_item_btn_add_photo.setOnClickListener {
             addPhoto()
@@ -78,11 +89,25 @@ class EditItemFragment : Fragment() {
         //Grabs the categories from the DataSnapshot and adds them to the list
         var categoryListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                categoryNames.clear()
+                categoryKeys.clear()
+
                 for(postSnapShot in dataSnapshot!!.children) {
                     var category = postSnapShot.getValue(Category::class.java)
-                    categoryNames.add(category?.categoryName!!)
-                    categoryKeys.add(category?.key!!)
+                    categoryNames.add(category!!.categoryName)
+                    categoryKeys.add(category!!.key)
                 }
+
+                arrOfCategoryNames = arrayOfNulls<String>(categoryNames.size)
+
+                for(i in arrOfCategoryNames.indices) {
+                    arrOfCategoryNames[i] = categoryNames[i]
+                }
+
+                var spinnerCategoryAdapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, arrOfCategoryNames)
+                spinnerCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                spinner.adapter = spinnerCategoryAdapter
             }
 
             override fun onCancelled(databaseError: DatabaseError?) {

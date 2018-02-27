@@ -131,6 +131,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
 
         categoryItemsList?.add(categoryItem)
 
+
         categoryItems[category] = categoryItemsList!!
     }
 

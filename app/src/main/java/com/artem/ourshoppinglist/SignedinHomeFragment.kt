@@ -72,7 +72,7 @@ class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
 
         //Grabs all current Lists that belong to the current user
         var ref = database.getReference("Lists")
-        ref.orderByChild("userID").equalTo(fbAuth.currentUser?.uid).addListenerForSingleValueEvent(listsListener)
+        ref.orderByChild("belongsToUser").equalTo(fbAuth.currentUser?.uid).addListenerForSingleValueEvent(listsListener)
 
         //Listens for data being added/removed, and adds or removes lists as necessary
         ref = database.getReference("Lists")
