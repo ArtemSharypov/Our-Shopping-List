@@ -125,14 +125,14 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
     private fun addCategoryItemToCategoryMap(categoryItem: CategoryItem, category: String) {
         var categoryItemsList = categoryItems[category]
 
-        if(categoryItems == null){
+        if(categoryItemsList == null){
             categoryItemsList = ArrayList<CategoryItem>()
         }
 
-        categoryItemsList?.add(categoryItem)
+        categoryItemsList.add(categoryItem)
 
 
-        categoryItems[category] = categoryItemsList!!
+        categoryItems[category] = categoryItemsList
     }
 
     //Creates a dialog for the name of a new category

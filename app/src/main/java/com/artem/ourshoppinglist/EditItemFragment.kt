@@ -194,6 +194,8 @@ class EditItemFragment : Fragment() {
 
                 //todo add a toast for saying that it created the new item
             }
+
+            cancel()
         }
     }
 

@@ -71,8 +71,13 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
 
     override fun getChildrenCount(groupPosition: Int): Int {
         var categoryName = categoriesList[groupPosition].categoryName
+        var count = 0
 
-        return categoryItems[categoryName]!!.size
+        if(categoryItems[categoryName] != null) {
+            count = categoryItems[categoryName]!!.size
+        }
+
+        return count
     }
 
     override fun getChild(groupPosition: Int, childPosition: Int): Any {
