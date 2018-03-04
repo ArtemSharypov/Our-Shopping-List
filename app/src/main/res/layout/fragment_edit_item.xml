@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:theme="@style/BackgroundStyle">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/fragment_edit_item_constraint_layout"
@@ -17,17 +17,20 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="Item Name"
+            android:text="@string/item_name"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/fragment_edit_item_et_item_name_input"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
             android:ems="10"
             android:inputType="textPersonName"
+            android:theme="@style/EditTextStyle"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_tv_item_name" />
 
@@ -36,18 +39,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:text="Quantity"
+            android:layout_marginTop="24dp"
+            android:text="@string/quantity"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_et_item_name_input" />
 
         <EditText
             android:id="@+id/fragment_edit_item_et_quantity_input"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
             android:ems="10"
             android:inputType="textPersonName"
+            android:theme="@style/EditTextStyle"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_tv_quantity" />
 
@@ -56,8 +62,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:text="Category"
+            android:layout_marginTop="24dp"
+            android:text="@string/category"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_et_quantity_input" />
 
@@ -68,6 +74,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:text="Photo"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_spnr_category_selection" />
 
@@ -77,6 +84,7 @@
             android:layout_height="150dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_tv_photo"
             app:srcCompat="@android:color/black" />
@@ -88,6 +96,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="Add Photo"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_tv_photo" />
 
@@ -96,27 +105,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:text="Barcode"
+            android:layout_marginTop="24dp"
+            android:text="@string/barcode"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_iv_item_photo" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_spnr_category_selection" />
 
         <EditText
             android:id="@+id/fragment_edit_item_et_barcode_input"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:ems="10"
             android:inputType="textPersonName"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_iv_item_photo"
-            tools:layout_editor_absoluteX="16dp" />
+            android:theme="@style/EditTextStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_tv_barcode" />
 
         <Button
             android:id="@+id/fragment_edit_item_btn_scan_barcode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="Or scan a barcode"
+            android:layout_marginTop="8dp"
+            android:text="@string/scan_barcode"
+            android:theme="@style/ButtonStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_et_barcode_input" />
 
@@ -124,9 +138,12 @@
             android:id="@+id/fragment_edit_item_btn_search_barcode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search"
-            app:layout_constraintStart_toEndOf="@+id/fragment_edit_item_et_barcode_input"
-            app:layout_constraintTop_toTopOf="@+id/fragment_edit_item_et_barcode_input" />
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/search"
+            android:theme="@style/ButtonStyle"
+            app:layout_constraintStart_toEndOf="@+id/fragment_edit_item_btn_scan_barcode"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_et_barcode_input" />
 
         <Spinner
             android:id="@+id/fragment_edit_item_spnr_category_selection"
@@ -135,8 +152,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
             android:padding="8dp"
-            android:textColor="#000000"
-            android:textSize="20sp"
+            android:theme="@style/SpinnerStyle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_edit_item_tv_category" />

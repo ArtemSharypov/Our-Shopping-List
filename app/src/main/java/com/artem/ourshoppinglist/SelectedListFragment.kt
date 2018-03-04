@@ -44,10 +44,6 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
             createNewCategoryItem()
         }
 
-        view.fragment_selected_list_btn_new_category.setOnClickListener {
-            createNewCategoryDialog()
-        }
-
         return view
     }
 
@@ -168,6 +164,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
     override fun onPrepareOptionsMenu(menu: Menu?) {
         menu?.findItem(R.id.action_delete)?.isVisible = true
         menu?.findItem(R.id.action_back)?.isVisible = true
+        menu?.findItem(R.id.action_create_category)?.isVisible = true
 
         super.onPrepareOptionsMenu(menu)
     }
@@ -185,6 +182,11 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
             R.id.action_back -> {
                 selected = true
                 goBack()
+            }
+
+            R.id.action_create_category -> {
+                selected = true
+                createNewCategoryDialog()
             }
         }
 
