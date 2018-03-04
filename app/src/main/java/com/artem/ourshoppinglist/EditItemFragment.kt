@@ -1,7 +1,9 @@
 package com.artem.ourshoppinglist
 
 import android.content.Context
+import android.os.AsyncTask
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.view.*
 import android.widget.ArrayAdapter
@@ -12,8 +14,92 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_edit_item.*
 import kotlinx.android.synthetic.main.fragment_edit_item.view.*
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 class EditItemFragment : Fragment() {
+
+    inner class BarcodeLookUpTask : AsyncTask<String, Void, String>() {
+        override fun onPreExecute() {
+            super.onPreExecute()
+
+            var snackBar = Snackbar.make(fragment_edit_item_btn_scan_barcode, "Searching for the barcode....", Snackbar.LENGTH_INDEFINITE)
+                snackBar.setAction("Action", null)
+                snackBar.setAction("Cancel", object : View.OnClickListener {
+                    override fun onClick(p0: View?) {
+                        barcodeLookupTask.cancel(true)
+                        snackBar.dismiss()
+                    }
+                })
+        }
+
+        override fun doInBackground(vararg args: String?): String {
+            var response = ""
+
+            if(args.isNotEmpty()) {
+                var barcode = args[0].toString()
+
+                try {
+                    var baseURL = "https://api.upcitemdb.com/prod/trial/lookup?upc=" + barcode
+                    var url = URL(baseURL)
+
+                    with(url.openConnection() as HttpURLConnection) {
+                        requestMethod = "GET"
+
+                        BufferedReader(InputStreamReader(inputStream)).use {
+                            val responseSB = StringBuffer()
+
+                            var inputLine = it.readLine()
+                            while(inputLine != null) {
+                                responseSB.append(inputLine)
+                                inputLine = it.readLine()
+                            }
+
+                            response = responseSB.toString()
+                        }
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+
+            return response
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+
+            if(result != null) {
+                try {
+                    var resultsJSON = JSONObject(result)
+                    var resultCode = resultsJSON.getString("code")
+
+                    if(resultCode == "OK") {
+                        var itemsJSON = JSONArray(resultsJSON.getJSONArray("items"))
+
+                        if (itemsJSON.length() > 0) {
+                            var firstItemObj = itemsJSON.getJSONObject(0)
+
+                            //todo add a dialog for if a user wants to use the item name
+                            fragment_edit_item_et_item_name_input.setText(firstItemObj.getString("title"))
+                        }
+                    } else {
+                        Snackbar.make(fragment_edit_item_btn_scan_barcode, "Error: " + resultCode, Snackbar.LENGTH_INDEFINITE)
+                                .setAction("Action", null).show()
+                    }
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     private var database = FirebaseDatabase.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
     private var activityToolbarCallback: ChangeToolbarTitleInterface? = null
@@ -23,6 +109,7 @@ class EditItemFragment : Fragment() {
     private var categoryKeys = ArrayList<String>()
     private var arrOfCategoryNames = arrayOfNulls<String>(0)
     private lateinit var spinner: Spinner
+    private lateinit var barcodeLookupTask: AsyncTask<String, Void, String>
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_edit_item, container, false)
@@ -57,18 +144,6 @@ class EditItemFragment : Fragment() {
         spinner = view.fragment_edit_item_spnr_category_selection
         fillCategoryNamesAndKeys()
 
-        //var spinnerCategoryAdapter = ArrayAdapter(context, R.layout.category_spinner_item, categoryNames)
-        //spinnerCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        //view.fragment_edit_item_spnr_category_selection.adapter = spinnerCategoryAdapter
-
-        var list_of_items = arrayOf("Item 1", "Item 2", "Item 3")
-
-        var arrOfItems =  arrayOfNulls<String>(categoryNames.size)
-        for(i in arrOfItems.indices) {
-            arrOfItems[i] = "stuff" + i
-        }
-
         view.fragment_edit_item_btn_add_photo.setOnClickListener {
             addPhoto()
         }
@@ -78,7 +153,7 @@ class EditItemFragment : Fragment() {
         }
 
         view.fragment_edit_item_btn_search_barcode.setOnClickListener{
-            searchWithBarcode(view.fragment_edit_item_et_barcode_input.text.toString())
+            searchWithBarcode()
         }
 
         return view
@@ -152,8 +227,17 @@ class EditItemFragment : Fragment() {
     }
 
     //Checks if there's an item with the existing barcode within the API call
-    private fun searchWithBarcode(barcode: String){
-        //todo implement searching for an item with a barcode
+    private fun searchWithBarcode(){
+        val BARCODE_LENGTH = 12
+        var currBarcode = fragment_edit_item_et_barcode_input.text.toString()
+
+        //Check the necessary length
+        if(currBarcode.length == BARCODE_LENGTH) {
+            barcodeLookupTask = BarcodeLookUpTask().execute(currBarcode)
+        } else {
+            Snackbar.make(fragment_edit_item_btn_scan_barcode, "Error: The barcode must contain 12 digits", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+        }
     }
 
     private fun addPhoto(){
@@ -183,24 +267,26 @@ class EditItemFragment : Fragment() {
                 var category = CategoryItem(itemName, quantity, barcode, itemKey, categoryKey, categoryName, listKey)
 
                 ref.child(itemKey).setValue(category)
-
-                //todo add a toast for saying that it saved
             } else {
                 //create a new item
                 var createdCategoryItemRef = ref.push()
                 var category = CategoryItem(itemName, quantity, barcode, createdCategoryItemRef.key, categoryKey, categoryName, listKey)
 
                 createdCategoryItemRef.setValue(category)
-
-                //todo add a toast for saying that it created the new item
+                itemKey = createdCategoryItemRef.key
             }
 
-            cancel()
+            Snackbar.make(fragment_edit_item_constraint_layout, "Saved the item", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
         }
     }
 
     //Goes back to the list of category items
     private fun cancel(){
+        if(::barcodeLookupTask.isInitialized) {
+            barcodeLookupTask.cancel(true)
+        }
+
         activity.onBackPressed()
     }
 
