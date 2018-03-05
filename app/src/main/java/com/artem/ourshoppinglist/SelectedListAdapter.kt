@@ -10,14 +10,15 @@ import kotlinx.android.synthetic.main.row_category_title.view.*
 
 
 class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>, categoryItems: HashMap<String, ArrayList<CategoryItem>>,
-                          callback: SelectedListAdapter.EditCategoryItem): BaseExpandableListAdapter(){
+                          callback: SelectedListAdapter.EditListItemsInterface): BaseExpandableListAdapter(){
     private var context = context
     private var categoriesList = categoriesList
     private var categoryItems = categoryItems
     private var callback = callback
 
-    interface EditCategoryItem {
-        fun categoryItemEditClicked(categoryItem: CategoryItem, listKey: String)
+    interface EditListItemsInterface {
+        fun categoryItemEditClicked(categoryItem: CategoryItem)
+        fun categoryEditClicked(category: Category)
     }
 
     override fun getGroup(groupPosition: Int): Any {
@@ -43,7 +44,10 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
             view = convertView
         }
 
-        view.row_category_title_tv_category_name?.text = category.categoryName
+        view.row_category_title_tv_category_name.text = category.categoryName
+        view.row_category_title_btn_edit_category.setOnClickListener {
+            callback.categoryEditClicked(category)
+        }
 
         return view
     }
@@ -63,7 +67,7 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
         view.row_category_item_tv_item_name.text = categoryItem.itemName
         view.row_category_item_tv_item_quantity.text = categoryItem.quantity.toString()
         view.row_category_item_btn_edit_item.setOnClickListener {
-            callback.categoryItemEditClicked(categoryItem, category.belongsToListKey)
+            callback.categoryItemEditClicked(categoryItem)
         }
 
         return view

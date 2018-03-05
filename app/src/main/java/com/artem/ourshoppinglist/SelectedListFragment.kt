@@ -9,10 +9,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.android.synthetic.main.dialog_create_new_category.view.*
+import kotlinx.android.synthetic.main.dialog_edit_and_create_category.view.*
 import kotlinx.android.synthetic.main.fragment_selected_list.view.*
 
-class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
+class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterface {
     private var database = FirebaseDatabase.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
     private var activityToolbarCallback: ChangeToolbarTitleInterface? = null
@@ -135,11 +135,11 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
     private fun createNewCategoryDialog(){
         //Create a dialog popup for creating a new category
         var inflater = activity.layoutInflater
-        var promptsView = inflater.inflate(R.layout.dialog_create_new_category, null)
+        var promptsView = inflater.inflate(R.layout.dialog_edit_and_create_category, null)
         var alertDialogBuilder = AlertDialog.Builder(activity)
         alertDialogBuilder.setView(promptsView)
 
-        var categoryNameInput = promptsView.dialog_create_new_category_et_category_input
+        var categoryNameInput = promptsView.dialog_edit_and_create_category_et_category_input
 
         alertDialogBuilder.setCancelable(true)
                 .setPositiveButton("Create Category", {dialogInterface, i ->
@@ -211,7 +211,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
 
     //Deletes the current list
     private fun deleteList() {
-        var ref = database.getReference("Categories")
+        var ref = database.getReference("Lists")
         ref.child(listKey).removeValue()
 
         goBack()
@@ -230,12 +230,12 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
     }
 
     //Switches to editing a category item fragment
-    override fun categoryItemEditClicked(categoryItem: CategoryItem, listKey: String) {
+    override fun categoryItemEditClicked(categoryItem: CategoryItem) {
         var editItemFragment = EditItemFragment()
 
         var bundle = Bundle()
         bundle.putString("key", categoryItem.key)
-        bundle.putString("listKey", listKey)
+        bundle.putString("listKey", categoryItem.belongsToListKey)
         bundle.putString("barcode", categoryItem.barcode)
         bundle.putString("category", categoryItem.categoryName)
         bundle.putString("itemName", categoryItem.itemName)
@@ -244,5 +244,88 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditCategoryItem {
         editItemFragment.arguments = bundle
 
         activityCallback?.replaceFragment(editItemFragment)
+    }
+
+    //Creates a dialog for editing, or deleting a category
+    override fun categoryEditClicked(category: Category){
+        var inflater = activity.layoutInflater
+        var promptsView = inflater.inflate(R.layout.dialog_edit_and_create_category, null)
+        var alertDialogBuilder = AlertDialog.Builder(activity)
+        alertDialogBuilder.setView(promptsView)
+
+        var categoryNameInput = promptsView.dialog_edit_and_create_category_et_category_input
+       categoryNameInput.setText(category.categoryName)
+
+        alertDialogBuilder.setCancelable(true)
+                .setPositiveButton("Save", {dialogInterface, i ->
+                    category.categoryName = categoryNameInput.text.toString()
+
+                    var ref = database.getReference("Categories")
+                    ref.child(category.key).setValue(category)
+
+                    selectedListAdapter.notifyDataSetInvalidated()
+
+                    dialogInterface.cancel()
+                })
+                .setNegativeButton("Cancel", {dialogInterface, i ->
+                    dialogInterface.cancel()
+                })
+                .setNeutralButton("Delete") {dialogInterface, i ->
+                    confirmDeleteCategoryDialog(category)
+                }
+
+        var alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+    }
+
+    //Creates a dialog for confirmation on whether or not to delete the category
+    //If the category is to be deleted, then it removes it and all categoryItems that belong to it from the list/database
+    private fun confirmDeleteCategoryDialog(category: Category) {
+        var inflater = activity.layoutInflater
+        var promptsView = inflater.inflate(R.layout.dialog_delete_category_confirmation, null)
+        var alertDialogBuilder = AlertDialog.Builder(activity)
+        alertDialogBuilder.setView(promptsView)
+
+        alertDialogBuilder.setCancelable(true)
+                .setPositiveButton("Delete", {dialogInterface, i ->
+                    var ref = database.getReference("Categories")
+                    ref.child(category.key).removeValue()
+
+                    deleteAllCategoryItemsUnderCategory(category)
+
+                    categoriesList.remove(category)
+                    categoryItems.remove(category.categoryName)
+
+                    selectedListAdapter.notifyDataSetInvalidated()
+
+                    dialogInterface.cancel()
+                })
+                .setNegativeButton("Cancel", {dialogInterface, i ->
+                    dialogInterface.cancel()
+                })
+        var alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+    }
+
+    //Deletes all categoryItems from Firebase that have the same key as the category passed in
+    private fun deleteAllCategoryItemsUnderCategory(category: Category) {
+        var ref = database.getReference("CategoryItems")
+
+        //Grabs the category items from the DataSnapshot and adds them to the map
+        var categoryItemsListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                for(postSnapShot in dataSnapshot!!.children) {
+                    var categoryItem = postSnapShot.getValue(CategoryItem::class.java)
+                    ref.child(categoryItem?.key).removeValue()
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError?) {
+                println("loadPost:onCancelled ${databaseError!!.toException()}")
+            }
+        }
+
+        var categoryItemsRef = database.getReference("CategoryItems")
+        categoryItemsRef.orderByChild("belongsToCategoryKey").equalTo(category.key).addListenerForSingleValueEvent(categoryItemsListener)
     }
 }
