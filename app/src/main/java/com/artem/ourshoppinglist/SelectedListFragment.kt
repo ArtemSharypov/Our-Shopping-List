@@ -310,6 +310,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
     //Deletes all categoryItems from Firebase that have the same key as the category passed in
     private fun deleteAllCategoryItemsUnderCategory(category: Category) {
         var ref = database.getReference("CategoryItems")
+        var numItemsDeleted = 0
 
         //Grabs the category items from the DataSnapshot and adds them to the map
         var categoryItemsListener = object : ValueEventListener {
@@ -317,7 +318,10 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
                 for(postSnapShot in dataSnapshot!!.children) {
                     var categoryItem = postSnapShot.getValue(CategoryItem::class.java)
                     ref.child(categoryItem?.key).removeValue()
+                    numItemsDeleted--
                 }
+
+                reduceListItemsCountBy(numItemsDeleted)
             }
 
             override fun onCancelled(databaseError: DatabaseError?) {
@@ -327,5 +331,29 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
 
         var categoryItemsRef = database.getReference("CategoryItems")
         categoryItemsRef.orderByChild("belongsToCategoryKey").equalTo(category.key).addListenerForSingleValueEvent(categoryItemsListener)
+    }
+
+    //Updates the numItems field for a ShoppingList in the back end for when CategoryItem's / Category's are deleted/removed
+    private fun reduceListItemsCountBy(count: Int) {
+        var listsListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                var list = dataSnapshot?.getValue(ShoppingList::class.java)
+
+                if(list?.numItems != null) {
+                    list.numItems = list?.numItems + count
+
+                    //Updates the list with the new count
+                    var ref = database.getReference("Lists")
+                    ref.child(listKey).setValue(list)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError?) {
+                println("loadPost:onCancelled ${databaseError!!.toException()}")
+            }
+        }
+
+        var ref = database.getReference("Lists")
+        ref.child(listKey).addListenerForSingleValueEvent(listsListener)
     }
 }

@@ -54,7 +54,6 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
 
     override fun getChildView(groupPosition: Int, childPosition: Int, isExpanded: Boolean, convertView: View?, viewGroup: ViewGroup?): View {
         var categoryItem = getChild(groupPosition, childPosition) as CategoryItem
-        var category = getGroup(groupPosition) as Category
         var view: View
 
         if (convertView == null) {

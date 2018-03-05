@@ -256,6 +256,8 @@ class EditItemFragment : Fragment() {
             var ref = database.getReference("CategoryItems")
             ref.child(itemKey).removeValue()
 
+            updateListItemsCountBy(-1)
+
             Snackbar.make(fragment_edit_item_constraint_layout, "Deleted the item", Snackbar.LENGTH_SHORT)
                     .setAction("Action", null).show()
 
@@ -293,11 +295,37 @@ class EditItemFragment : Fragment() {
 
                 createdCategoryItemRef.setValue(category)
                 itemKey = createdCategoryItemRef.key
+
+                updateListItemsCountBy(1)
             }
 
             Snackbar.make(fragment_edit_item_constraint_layout, "Saved the item", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
+    }
+
+    //Updates the numItems field for a ShoppingList in the back end for when CategoryItem's are deleted/added
+    private fun updateListItemsCountBy(count: Int) {
+        var listsListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                var list = dataSnapshot?.getValue(ShoppingList::class.java)
+
+                if(list?.numItems != null) {
+                    list.numItems = list?.numItems + count
+
+                    //Updates the list with the new count
+                    var ref = database.getReference("Lists")
+                    ref.child(listKey).setValue(list)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError?) {
+                println("loadPost:onCancelled ${databaseError!!.toException()}")
+            }
+        }
+
+        var ref = database.getReference("Lists")
+        ref.child(listKey).addListenerForSingleValueEvent(listsListener)
     }
 
     //Goes back to the list of category items

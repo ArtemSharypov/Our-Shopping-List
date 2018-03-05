@@ -14,7 +14,7 @@ class ShoppingListAdapter(shoppingLists: ArrayList<ShoppingList>, callback: Shop
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         fun bindItems(currList: ShoppingList, callback: OnListClicked){
             itemView.row_shopping_list_tv_list_name.text = currList.listName
-            itemView.row_shopping_list_tv_num_items_in_list.text = currList.listName
+            itemView.row_shopping_list_tv_num_items_in_list.text = currList.numItems.toString()
             itemView.setOnClickListener {
                 callback.shoppingListClicked(currList)
             }
