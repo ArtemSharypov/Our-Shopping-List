@@ -198,6 +198,7 @@ class EditItemFragment : Fragment() {
     override fun onPrepareOptionsMenu(menu: Menu?) {
         menu?.findItem(R.id.action_cancel)?.isVisible = true
         menu?.findItem(R.id.action_save)?.isVisible = true
+        menu?.findItem(R.id.action_delete)?.isVisible = true
 
         super.onPrepareOptionsMenu(menu)
     }
@@ -215,6 +216,11 @@ class EditItemFragment : Fragment() {
             R.id.action_save -> {
                 selected = true
                 saveItem()
+            }
+
+            R.id.action_delete -> {
+                selected = true
+                deleteItem()
             }
         }
 
@@ -242,6 +248,19 @@ class EditItemFragment : Fragment() {
 
     private fun addPhoto(){
         //todo implement adding a photo to an item
+    }
+
+    //Deletes the current item, and returns to the list screen
+    private fun deleteItem(){
+        if(::itemKey.isInitialized && itemKey != "") {
+            var ref = database.getReference("CategoryItems")
+            ref.child(itemKey).removeValue()
+
+            Snackbar.make(fragment_edit_item_constraint_layout, "Deleted the item", Snackbar.LENGTH_SHORT)
+                    .setAction("Action", null).show()
+
+            cancel()
+        }
     }
 
     //Saves the current item, or creates a new item
