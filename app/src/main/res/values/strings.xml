@@ -25,4 +25,5 @@
     <string name="create_category">Create Category</string>
     <string name="delete">Delete</string>
     <string name="delete_category_confirm">Are you sure you want to delete this Category?</string>
+    <string name="exit_confirmation">Are you sure you want to exit?</string>
 </resources>

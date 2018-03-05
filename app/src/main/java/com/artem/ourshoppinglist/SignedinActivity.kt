@@ -4,6 +4,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
 import android.view.Menu
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
@@ -88,11 +89,26 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeTo
         }
         else
         {
-            //Clear the activity stack, and then sets up for exiting the activity
-            var intent = Intent(applicationContext, MainActivity::class.java)
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent.putExtra("EXIT", true)
-            startActivity(intent)
+            var promptsView = layoutInflater.inflate(R.layout.dialog_exit_app_confirmation, null)
+            var alertDialogBuilder = AlertDialog.Builder(this)
+            alertDialogBuilder.setView(promptsView)
+
+            alertDialogBuilder.setCancelable(true)
+                    .setPositiveButton("Yes", {dialogInterface, i ->
+                        //Clear the activity stack, and then sets up for exiting the activity
+                        var intent = Intent(applicationContext, MainActivity::class.java)
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        intent.putExtra("EXIT", true)
+                        startActivity(intent)
+
+                        dialogInterface.cancel()
+                    })
+                    .setNegativeButton("No", {dialogInterface, i ->
+                        dialogInterface.cancel()
+                    })
+
+            var alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
         }
     }
 }
