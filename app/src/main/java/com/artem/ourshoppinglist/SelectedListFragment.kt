@@ -11,6 +11,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.dialog_edit_and_create_category.view.*
 import kotlinx.android.synthetic.main.fragment_selected_list.view.*
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemLongClickListener
+import android.widget.AdapterView.OnItemClickListener
+import android.widget.ExpandableListView
+
 
 class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterface {
     private var database = FirebaseDatabase.getInstance()
@@ -24,6 +29,8 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.fragment_selected_list, container, false)
+        var list = view.fragment_selected_list_elv_lists
+        val swipeDetector = SwipeDetector()
 
         if(arguments != null){
             listKey = arguments.getString("key")
@@ -36,12 +43,79 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
         setupCategoryListener()
         setupCategoryItemsListener()
 
-        selectedListAdapter = SelectedListAdapter(context, categoriesList, categoryItems, this)
-
-        view.fragment_selected_list_elv_lists.setAdapter(selectedListAdapter)
-
         view.fragment_selected_list_fab_new_item.setOnClickListener {
             createNewCategoryItem()
+        }
+
+        selectedListAdapter = SelectedListAdapter(context, categoriesList, categoryItems, this)
+
+        list.setAdapter(selectedListAdapter)
+
+        list.setOnTouchListener(swipeDetector)
+
+        list.onItemClickListener = object : OnItemClickListener {
+            override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val itemType = ExpandableListView.getPackedPositionType(id)
+
+                if (swipeDetector.swipeDetected()) {
+                    //onSwipeAction for only child items
+                    if (itemType == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                        var childPosition = ExpandableListView.getPackedPositionChild(id)
+                        var groupPosition = ExpandableListView.getPackedPositionGroup(id)
+
+                        var groupItem = categoriesList[groupPosition]
+                        var listOfChildItems = categoryItems[groupItem.categoryName]
+                        var childItem = listOfChildItems?.get(childPosition)
+
+                        //Removes the child item from the list display, as well as from the backend
+                        if(listOfChildItems != null && childItem != null) {
+                            listOfChildItems.remove(childItem)
+                            selectedListAdapter.notifyDataSetChanged()
+
+                            var ref = database.getReference("CategoryItems")
+                            ref.child(childItem.key).removeValue()
+
+                            reduceListItemsCountBy(-1)
+                        }
+                    }
+                } else {
+                    // do the onItemClick action
+                }
+            }
+        }
+
+        list.onItemLongClickListener = object : OnItemLongClickListener {
+            override fun onItemLongClick(parent: AdapterView<*>, view: View, position: Int, id: Long): Boolean {
+                val itemType = ExpandableListView.getPackedPositionType(id)
+
+                if (swipeDetector.swipeDetected()) {
+                    //onSwipeAction for only child items
+                    if (itemType == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                        var childPosition = ExpandableListView.getPackedPositionChild(id)
+                        var groupPosition = ExpandableListView.getPackedPositionGroup(id)
+
+                        var groupItem = categoriesList[groupPosition]
+                        var listOfChildItems = categoryItems[groupItem.categoryName]
+                        var childItem = listOfChildItems?.get(childPosition)
+
+                        //Removes the child item from the list display, as well as from the backend
+                        if(listOfChildItems != null && childItem != null) {
+                            listOfChildItems.remove(childItem)
+                            selectedListAdapter.notifyDataSetChanged()
+
+                            var ref = database.getReference("CategoryItems")
+                            ref.child(childItem.key).removeValue()
+
+                            reduceListItemsCountBy(-1)
+                        }
+                    }
+
+                    return true
+                } else {
+                    // do the onItemLongClick action
+                    return false
+                }
+            }
         }
 
         return view
