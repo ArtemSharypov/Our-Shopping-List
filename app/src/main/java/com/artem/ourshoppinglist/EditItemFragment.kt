@@ -81,7 +81,7 @@ class EditItemFragment : Fragment() {
                     var resultCode = resultsJSON.getString("code")
 
                     if(resultCode == "OK") {
-                        var itemsJSON = JSONArray(resultsJSON.getJSONArray("items"))
+                        var itemsJSON = resultsJSON.getJSONArray("items")
 
                         if (itemsJSON.length() > 0) {
                             var firstItemObj = itemsJSON.getJSONObject(0)

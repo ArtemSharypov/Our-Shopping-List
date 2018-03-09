@@ -45,9 +45,9 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
         }
 
         view.row_category_title_tv_category_name.text = category.categoryName
-        view.row_category_title_btn_edit_category.setOnClickListener {
-            callback.categoryEditClicked(category)
-        }
+//        view.row_category_title_btn_edit_category.setOnClickListener {
+//            callback.categoryEditClicked(category)
+//        }
 
         return view
     }

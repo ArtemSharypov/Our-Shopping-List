@@ -291,6 +291,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
 
     //Deletes the current list
     private fun deleteList() {
+        //todo add a dialog to confirm deletion of the list
         var ref = database.getReference("Lists")
         ref.child(listKey).removeValue()
 
