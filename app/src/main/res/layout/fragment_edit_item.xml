@@ -23,6 +23,7 @@
 
         <EditText
             android:id="@+id/fragment_edit_item_et_item_name_input"
+            style="@style/EditTextStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -46,6 +47,7 @@
 
         <EditText
             android:id="@+id/fragment_edit_item_et_quantity_input"
+            style="@style/EditTextStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -112,6 +114,7 @@
 
         <EditText
             android:id="@+id/fragment_edit_item_et_barcode_input"
+            style="@style/EditTextStyle"
             android:layout_width="0dp"
             android:layout_height="46dp"
             android:layout_marginEnd="8dp"

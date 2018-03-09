@@ -55,6 +55,7 @@
 
     <EditText
         android:id="@+id/fragment_signup_et_email_input"
+        style="@style/EditTextStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="64dp"

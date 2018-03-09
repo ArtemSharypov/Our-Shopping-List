@@ -51,6 +51,12 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
 
         list.setAdapter(selectedListAdapter)
 
+        if(selectedListAdapter.groupCount > 0) {
+            for (i in 0 until selectedListAdapter.groupCount - 1) {
+                list.expandGroup(i)
+            }
+        }
+
         list.setOnTouchListener(swipeDetector)
 
         list.onItemClickListener = object : OnItemClickListener {

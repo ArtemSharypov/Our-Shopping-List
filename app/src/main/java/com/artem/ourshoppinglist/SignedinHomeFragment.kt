@@ -105,6 +105,8 @@ class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
                     selectedListFragment.arguments = bundle
 
                     activityCallback?.replaceFragment(selectedListFragment)
+
+                    dialogInterface.cancel()
                 })
                 .setNegativeButton("Cancel", {dialogInterface, i ->
                     dialogInterface.cancel()
