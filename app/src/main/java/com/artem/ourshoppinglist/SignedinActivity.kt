@@ -90,7 +90,7 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeTo
         else
         {
             var promptsView = layoutInflater.inflate(R.layout.dialog_exit_app_confirmation, null)
-            var alertDialogBuilder = AlertDialog.Builder(this)
+            var alertDialogBuilder = AlertDialog.Builder(this, R.style.DialogStyle)
             alertDialogBuilder.setView(promptsView)
 
             alertDialogBuilder.setCancelable(true)

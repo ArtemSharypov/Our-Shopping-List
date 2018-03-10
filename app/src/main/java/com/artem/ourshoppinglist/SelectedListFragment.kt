@@ -15,6 +15,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ExpandableListView
+import kotlinx.android.synthetic.main.fragment_selected_list.*
 
 
 class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterface {
@@ -50,13 +51,6 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
         selectedListAdapter = SelectedListAdapter(context, categoriesList, categoryItems, this)
 
         list.setAdapter(selectedListAdapter)
-
-        if(selectedListAdapter.groupCount > 0) {
-            for (i in 0 until selectedListAdapter.groupCount - 1) {
-                list.expandGroup(i)
-            }
-        }
-
         list.setOnTouchListener(swipeDetector)
 
         list.onItemClickListener = object : OnItemClickListener {
@@ -180,6 +174,13 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
 
                 if(selectedListAdapter != null) {
                     selectedListAdapter?.notifyDataSetChanged()
+
+                    var i = 0
+
+                    while(i < selectedListAdapter.groupCount) {
+                        fragment_selected_list_elv_lists.expandGroup(i)
+                        i++
+                    }
                 }
             }
 
@@ -216,7 +217,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
         //Create a dialog popup for creating a new category
         var inflater = activity.layoutInflater
         var promptsView = inflater.inflate(R.layout.dialog_edit_and_create_category, null)
-        var alertDialogBuilder = AlertDialog.Builder(activity)
+        var alertDialogBuilder = AlertDialog.Builder(activity, R.style.DialogStyle)
         alertDialogBuilder.setView(promptsView)
 
         var categoryNameInput = promptsView.dialog_edit_and_create_category_et_category_input
@@ -244,7 +245,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
     override fun onPrepareOptionsMenu(menu: Menu?) {
         menu?.findItem(R.id.action_delete)?.isVisible = true
         menu?.findItem(R.id.action_back)?.isVisible = true
-        menu?.findItem(R.id.action_create_category)?.isVisible = true
+        menu?.findItem(R.id.action_new_category)?.isVisible = true
 
         super.onPrepareOptionsMenu(menu)
     }
@@ -264,7 +265,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
                 goBack()
             }
 
-            R.id.action_create_category -> {
+            R.id.action_new_category -> {
                 selected = true
                 createNewCategoryDialog()
             }
@@ -291,9 +292,33 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
 
     //Deletes the current list
     private fun deleteList() {
-        //todo add a dialog to confirm deletion of the list
-        var ref = database.getReference("Lists")
-        ref.child(listKey).removeValue()
+        var inflater = activity.layoutInflater
+        var promptsView = inflater.inflate(R.layout.dialog_delete_list_confirmation, null)
+        var alertDialogBuilder = AlertDialog.Builder(activity, R.style.DialogStyle)
+        alertDialogBuilder.setView(promptsView)
+
+        alertDialogBuilder.setCancelable(true)
+                .setPositiveButton("Delete", {dialogInterface, i ->
+                    var ref = database.getReference("Lists")
+                    ref.child(listKey).removeValue()
+
+                    for(category in categoriesList) {
+                        ref = database.getReference("Categories")
+                        ref.child(category.key).removeValue()
+
+                        deleteAllCategoryItemsUnderCategory(category)
+
+                        categoriesList.remove(category)
+                        categoryItems.remove(category.categoryName)
+                    }
+
+                    dialogInterface.cancel()
+                })
+                .setNegativeButton("Cancel", {dialogInterface, i ->
+                    dialogInterface.cancel()
+                })
+        var alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
 
         goBack()
     }
@@ -331,7 +356,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
     override fun categoryEditClicked(category: Category){
         var inflater = activity.layoutInflater
         var promptsView = inflater.inflate(R.layout.dialog_edit_and_create_category, null)
-        var alertDialogBuilder = AlertDialog.Builder(activity)
+        var alertDialogBuilder = AlertDialog.Builder(activity, R.style.DialogStyle)
         alertDialogBuilder.setView(promptsView)
 
         var categoryNameInput = promptsView.dialog_edit_and_create_category_et_category_input
@@ -364,7 +389,7 @@ class SelectedListFragment : Fragment(), SelectedListAdapter.EditListItemsInterf
     private fun confirmDeleteCategoryDialog(category: Category) {
         var inflater = activity.layoutInflater
         var promptsView = inflater.inflate(R.layout.dialog_delete_category_confirmation, null)
-        var alertDialogBuilder = AlertDialog.Builder(activity)
+        var alertDialogBuilder = AlertDialog.Builder(activity, R.style.DialogStyle)
         alertDialogBuilder.setView(promptsView)
 
         alertDialogBuilder.setCancelable(true)

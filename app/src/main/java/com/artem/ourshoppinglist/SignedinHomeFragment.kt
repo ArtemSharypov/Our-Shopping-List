@@ -84,7 +84,7 @@ class SignedinHomeFragment : Fragment(), ShoppingListAdapter.OnListClicked {
         //Create a dialog popup for creating a new list
         var inflater = activity.layoutInflater
         var promptsView = inflater.inflate(R.layout.dialog_create_list, null)
-        var alertDialogBuilder = AlertDialog.Builder(activity)
+        var alertDialogBuilder = AlertDialog.Builder(activity, R.style.DialogStyle)
         alertDialogBuilder.setView(promptsView)
 
         var listNameInput = promptsView.dialog_create_list_tv_title_et_list_name

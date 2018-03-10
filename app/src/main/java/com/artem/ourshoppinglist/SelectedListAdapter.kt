@@ -44,6 +44,14 @@ class SelectedListAdapter(context: Context, categoriesList: ArrayList<Category>,
             view = convertView
         }
 
+        if (isExpanded)
+        {
+            view.row_category_title_iv_arrow_dropdown.setImageResource(R.drawable.ic_expand_less_white_24dp)
+        } else {
+            view.row_category_title_iv_arrow_dropdown.setImageResource(R.drawable.ic_expand_more_white_24dp)
+        }
+
+
         view.row_category_title_tv_category_name.text = category.categoryName
 //        view.row_category_title_btn_edit_category.setOnClickListener {
 //            callback.categoryEditClicked(category)

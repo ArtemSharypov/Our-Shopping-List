@@ -154,6 +154,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
+            android:backgroundTint="@android:color/background_light"
             android:padding="8dp"
             android:theme="@style/SpinnerStyle"
             app:layout_constraintEnd_toEndOf="parent"

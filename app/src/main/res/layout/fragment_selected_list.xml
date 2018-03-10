@@ -18,7 +18,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:groupIndicator="@null"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fragment_selected_list_fab_new_item"

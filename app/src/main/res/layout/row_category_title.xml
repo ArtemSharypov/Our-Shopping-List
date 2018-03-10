@@ -6,19 +6,29 @@
     android:layout_height="40dp"
     android:theme="@style/RowStyle">
 
+    <ImageView
+        android:id="@+id/row_category_title_iv_arrow_dropdown"
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@android:color/transparent" />
+
     <TextView
         android:id="@+id/row_category_title_tv_category_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:textAlignment="center"
         android:theme="@style/RowStyle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/row_category_title_iv_arrow_dropdown"
         app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
