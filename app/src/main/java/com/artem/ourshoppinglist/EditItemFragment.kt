@@ -14,7 +14,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_edit_item.*
 import kotlinx.android.synthetic.main.fragment_edit_item.view.*
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -103,6 +102,7 @@ class EditItemFragment : Fragment() {
     private var database = FirebaseDatabase.getInstance()
     private var activityCallback: ReplaceFragmentInterface? = null
     private var activityToolbarCallback: ChangeToolbarTitleInterface? = null
+    private var activityBarcodeCallback: PassBarcodeDataInterface? = null
     private lateinit var listKey: String
     private lateinit var itemKey: String
     private var categoryNames = ArrayList<String>()
@@ -139,6 +139,15 @@ class EditItemFragment : Fragment() {
             if (spinnerPos >= 0 && spinnerPos < categoryNames.size) {
                 view.fragment_edit_item_spnr_category_selection.setSelection(spinnerPos)
             }
+        }
+
+        var tempBarcode = activityBarcodeCallback?.getBarcodeFromActivity()!!
+
+        //Grabs the barcode from the activity, assuming that it comes from the scanned barcode
+        if(tempBarcode != "" && tempBarcode != null) {
+            barcode = tempBarcode
+            activityBarcodeCallback?.passBarcodeToActivity("")
+            view.fragment_edit_item_et_barcode_input.setText(barcode)
         }
 
         spinner = view.fragment_edit_item_spnr_category_selection
@@ -229,7 +238,7 @@ class EditItemFragment : Fragment() {
 
     //Switches to a screen to allow the scanning of a barcode
     private fun scanBarcode(){
-        //todo implement being able to scan a barcode using mobile vision
+        activityCallback?.replaceFragment(ScanBarcodeFragment())
     }
 
     //Checks if there's an item with the existing barcode within the API call
@@ -343,6 +352,7 @@ class EditItemFragment : Fragment() {
         try {
             activityCallback = context as ReplaceFragmentInterface
             activityToolbarCallback = context as ChangeToolbarTitleInterface
+            activityBarcodeCallback = context as PassBarcodeDataInterface
         } catch (e: ClassCastException) {
             throw ClassCastException(context?.toString() + " must implement ReplaceFragmentInterface")
         }

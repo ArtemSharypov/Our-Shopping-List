@@ -1,8 +1,11 @@
 package com.artem.ourshoppinglist
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.view.Menu
@@ -10,13 +13,21 @@ import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_signedin.*
 
-class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeToolbarTitleInterface {
+
+class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeToolbarTitleInterface, PassBarcodeDataInterface {
 
     private var fbAuth = FirebaseAuth.getInstance()
+    private var barcode: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signedin)
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 1)
+            }
+        }
 
         setSupportActionBar(toolbar)
         supportActionBar?.title = getString(R.string.app_name)
@@ -110,5 +121,13 @@ class SignedinActivity : AppCompatActivity(), ReplaceFragmentInterface, ChangeTo
             var alertDialog = alertDialogBuilder.create()
             alertDialog.show()
         }
+    }
+
+    override fun passBarcodeToActivity(barcode: String) {
+        this.barcode = barcode
+    }
+
+    override fun getBarcodeFromActivity() : String {
+        return barcode
     }
 }
